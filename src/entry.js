@@ -8,7 +8,8 @@
  */
 
 import { WebGLRenderer, PerspectiveCamera, Scene, Vector3 } from 'three';
-import { OrbitControls } from 'three-addons';
+import * as THREE from 'three';
+const OrbitControls = require('three-orbit-controls')(THREE)
 import SeedScene from './objects/Scene.js';
 
 const scene = new Scene();
@@ -20,7 +21,7 @@ const seedScene = new SeedScene();
 scene.add(seedScene);
 
 // camera
-camera.position.set(6,3,-10);
+camera.position.set(0, 0, 30);
 camera.lookAt(new Vector3(0,0,0));
 
 // renderer
@@ -33,7 +34,12 @@ const controls = new OrbitControls(camera);
 // render loop
 const onAnimationFrameHandler = (timeStamp) => {
   renderer.render(scene, camera);
-  seedScene.update && seedScene.update(timeStamp);
+  seedScene.update && seedScene.update(timeStamp, camera.quaternion);
+
+  camera.position.copy(seedScene.cameraParams.position  || null);
+  camera.matrix.lookAt(camera.position, seedScene.cameraParams.lookAt, seedScene.cameraParams.normal);
+  camera.rotation.setFromRotationMatrix(camera.matrix, camera.rotation.order)
+
   window.requestAnimationFrame(onAnimationFrameHandler);
 }
 window.requestAnimationFrame(onAnimationFrameHandler);
